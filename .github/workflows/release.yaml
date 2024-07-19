@@ -1,8 +1,6 @@
 name: release
 
 on:
-  release:
-    types: [published]
   push:
     branches:
       - "main"
@@ -21,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4.1.7 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v5.0.2 # v4
+      - uses: actions/setup-go@v5.0.2 # v5
         with:
           go-version: stable
       - name: Ensure Go
