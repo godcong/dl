@@ -5,32 +5,53 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
-	"time"
 
+	goversion "github.com/caarlos0/go-version"
 	"github.com/spf13/cobra"
 
-	"github.com/godcong/dl"
 	"github.com/godcong/dl/gen"
+	"github.com/godcong/dl/internal/io"
 )
 
 const helpExample = `
-	# Add default value to struct field with file(e.g. demo.go)
-	type Demo struct {
-		Name string ` + "`" + `default:"demo"` + "`" + `
-	}   
-	# Run the tool to generate default value
-	$ dl -f demo.go
+### Step 1: Define Struct with Default Tags
+
+Add the ` + "`default`" + ` tag to your struct fields to specify their default values:
+
+// example: demo.go
+type Demo struct {
+	Name string ` + "`default:" + `"demo"
+}
+
+### Step 2: Generate Default Value Loading Method
+
+Run DL to generate the necessary loading method for your struct:
+
+$> dl -f ./demo.go
 `
 
-var Version string
-var BuiltBy string
+const asciiArt = "\n   ___      ___          ____  __               __       \n  / _ \\___ / _/__ ___ __/ / /_/ / ___  ___ ____/ /__ ____\n / // / -_) _/ _ `/ // / / __/ /_/ _ \\/ _ `/ _  / -_) __/\n/____/\\__/_/ \\_,_/\\_,_/_/\\__/____|___/\\_,_/\\_,_/\\__/_/   \n                                                         \n"
+const website = "https://github.com/godcong/dl"
+
+// build tool goreleaser tags
+//nolint:gochecknoglobals
+var (
+	version   = ""
+	commit    = ""
+	treeState = ""
+	date      = ""
+	builtBy   = ""
+)
 
 var helpCmd = &cobra.Command{
 	Use:     "help",
 	Example: helpExample,
 	Run: func(cmd *cobra.Command, args []string) {
+		gv := buildVersion(version, commit, date, builtBy, treeState)
+		fmt.Println(gv)
 		_ = cmd.Help()
 	},
 }
@@ -64,7 +85,7 @@ var rootCmd = &cobra.Command{
 
 		var filelist []string
 		if stat.IsDir() {
-			filelist, err = dl.GetFileList(file)
+			filelist, err = io.ReadDir(file)
 			if err != nil {
 				return err
 			}
@@ -72,14 +93,13 @@ var rootCmd = &cobra.Command{
 			filelist = append(filelist, file)
 		}
 
-		header := gen.Header{
-			BuildDate: time.Now().Format("2006-01-02 15:04:05"),
-			BuiltBy:   BuiltBy,
-			Version:   Version,
-		}
+		head := buildVersion(version, commit, date, builtBy, treeState)
 		for _, s := range filelist {
-			err := dl.GenerateFromTags(header, s)
+			graph, err := gen.ParseFromTags(s)
 			if err != nil {
+				return err
+			}
+			if err := io.WriteGraph(s, head, graph); err != nil {
 				return err
 			}
 		}
@@ -104,4 +124,28 @@ func init() {
 
 func main() {
 	Execute()
+}
+
+func buildVersion(version, commit, date, builtBy, treeState string) goversion.Info {
+	return goversion.GetVersionInfo(
+		goversion.WithAppDetails("dl", "Default Loader is a default value generate tool for go structs", website),
+		goversion.WithASCIIName(asciiArt),
+		func(i *goversion.Info) {
+			if commit != "" {
+				i.GitCommit = commit
+			}
+			if version != "" {
+				i.GitVersion = version
+			}
+			if treeState != "" {
+				i.GitTreeState = treeState
+			}
+			if date != "" {
+				i.BuildDate = date
+			}
+			if builtBy != "" {
+				i.BuiltBy = builtBy
+			}
+		},
+	)
 }
