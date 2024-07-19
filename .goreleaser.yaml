@@ -1,0 +1,106 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    # - go generate ./...
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags: -s -w -X main.builtBy=GodCong -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}} -X main.treeState={{ .IsGitDirty }}
+    main: ./cmd/main.go
+    goos:
+      - darwin
+      - windows
+      - linux
+      - freebsd
+#      - netbsd
+#      - illumos
+    goarch:
+      - amd64
+      - arm64
+      - arm
+      - "386"
+      - ppc64
+#      - ppc64le
+      - s390x
+      - mips64
+      - mips64le
+      - riscv64
+#      - loong64
+    goarm:
+#      - "6"
+      - "7"
+    gomips:
+      - hardfloat
+    ignore:
+      - goos: darwin
+        goarch: "386"
+      - goos: freebsd
+        goarch: arm64
+      - goos: freebsd
+        goarch: amd64|386
+      - goos: windows
+        goarch: arm
+archives:
+  - format: tar.gz
+    wrap_in_directory: true
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    files:
+      - LICENSE
+      - README.md
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+
+snapshot:
+  name_template: nightly_{{ .ShortCommit }}
+
+checksum:
+  name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '(?i)^docs?:'
+      - '(?i)^docs\([^:]+\):'
+      - '(?i)^docs\[[^:]+\]:'
+      - '^tests?:'
+      - '(?i)^dev:'
+      - '(?i)^chore:'
+      - '^build\(deps\): bump .* in /docs \(#\d+\)'
+      - '^build\(deps\): bump .* in /\.github/peril \(#\d+\)'
+      - '^build\(deps\): bump .* in /scripts/gen_github_action_config \(#\d+\)'
+      - "merge conflict"
+      - Merge remote-tracking branch
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: godcong
+    name: dl
+  header: |
+    `Default Loader` is a go struct default value generator tool.
+    It can generate default value for struct field with tag `default` and generate by `dl` command.
+    
+    
+    See [https://github.com/godcong/dl](https://github.com/godcong/dl) for more information.
