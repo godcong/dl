@@ -150,8 +150,6 @@ func formatValue(typo string, value string) string {
 			values[i] = formatValue(innerType, values[i])
 		}
 		value = fmt.Sprintf("%s{%s}", typo, strings.Join(values, ","))
-	default:
-
 	}
 	return value
 }
@@ -195,10 +193,4 @@ func mapKeyValueTypes(typo string) (string, string) {
 		value = typo[end+1:]
 	}
 	return key, value
-}
-func pointerType(typo string) (string, bool) {
-	if strings.HasPrefix(typo, "*") {
-		return strings.TrimPrefix(typo, "*"), true
-	}
-	return typo, false
 }
