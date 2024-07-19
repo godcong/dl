@@ -1,4 +1,7 @@
-package dl
+// Copyright (c) 2024 GodCong. All rights reserved.
+
+// Package shell for Default Loader
+package shell
 
 import (
 	"log"
