@@ -1,3 +1,6 @@
+// Copyright (c) 2024 GodCong. All rights reserved.
+
+// Package dl for Default Loader
 package dl
 
 import (

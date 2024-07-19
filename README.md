@@ -24,6 +24,7 @@ go install github.com/godcong/dl/cmd@latest
 
 Add the `default` tag to your struct fields to specify their default values:
 ```go
+// example: demo.go
 type Demo struct {
     Name string `default:"demo"`
 }

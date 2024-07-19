@@ -1,3 +1,6 @@
+// Copyright (c) 2024 GodCong. All rights reserved.
+
+// Package dl for Default Loader
 package dl
 
 import (
@@ -35,4 +38,9 @@ func LoadInterface(ptr any) (bool, error) {
 // `ptr` should be a struct pointer
 func LoadStruct(ptr any) error {
 	return defaults.Set(ptr)
+}
+
+// Pointer creates a pointer to a value.
+func Pointer[T any](v T) *T {
+	return &v
 }
