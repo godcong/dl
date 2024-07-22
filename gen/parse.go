@@ -116,27 +116,6 @@ func formatField(value *Field) *Field {
 	return value
 }
 
-func formatDefaultValue(typo string) (string, bool) {
-	basicType := true
-	switch typo {
-	case "bool":
-		fallthrough
-	case "int", "int8", "int16", "int32", "int64":
-		fallthrough
-	case "uint", "uint8", "uint16", "uint32", "uint64":
-		fallthrough
-	case "float32", "float64":
-		fallthrough
-	case "string":
-		fallthrough
-	case "[]byte":
-		basicType = true
-	default:
-		basicType = false
-	}
-	return typo, basicType
-}
-
 func formatValue(typo string, value string) string {
 	switch {
 	case strings.HasPrefix(typo, "*"):
