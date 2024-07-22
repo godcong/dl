@@ -3,10 +3,6 @@
 // Package dl for Default Loader
 package dl
 
-import (
-	"github.com/creasty/defaults"
-)
-
 // DefaultLoader is an interface that can be implemented by structs to customize the default
 type DefaultLoader interface {
 	Default() error
@@ -31,6 +27,15 @@ func Load[T any](ptr *T) error {
 		return err
 	}
 	return LoadStruct(ptr)
+}
+
+// MustLoad initializes members in a struct referenced by a pointer.
+// Maps and slices are initialized by `make` and other primitive types are set with default values.
+// `ptr` should be a struct pointer
+func MustLoad[T any](ptr *T) {
+	if err := Load(ptr); err != nil {
+		panic(err)
+	}
 }
 
 // LoadWithOption initializes members in a struct referenced by a pointer.
@@ -61,7 +66,7 @@ func LoadInterface[P any](ptr any, arg P) (bool, error) {
 // Maps and slices are initialized by `make` and other primitive types are set with default values.
 // `ptr` should be a struct pointer
 func LoadStruct(ptr any) error {
-	return defaults.Set(ptr)
+	return setDefaults(ptr)
 }
 
 // Pointer creates a pointer to a value.
