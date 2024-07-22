@@ -29,8 +29,13 @@ func (s Struct) IsValid() bool {
 
 // Field represents a field in the struct.
 type Field struct {
-	IsStruct bool
-	Name     string
-	Type     string
-	Value    string
+	IsBasic bool
+	Name    string
+	Type    string
+	Value   string
+}
+
+// IsValid checks if the field is valid.
+func (f Field) IsValid() bool {
+	return f.Name != "" && f.Value != ""
 }
