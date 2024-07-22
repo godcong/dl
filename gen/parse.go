@@ -73,9 +73,10 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 	val = strings.TrimPrefix(val, "\"")
 	val = strings.TrimSuffix(val, "\"")
 	return &Field{
-		Name:  fieldName,
-		Type:  fieldType,
-		Value: val,
+		IsBasic: true,
+		Name:    fieldName,
+		Type:    fieldType,
+		Value:   val,
 	}
 }
 
