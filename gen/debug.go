@@ -1,3 +1,6 @@
+// Copyright (c) 2024 GodCong. All rights reserved.
+
+// Package gen for Default Loader
 package gen
 
 import (
@@ -14,6 +17,6 @@ func Debug() {
 func debugPrint(a ...any) {
 	if debug {
 		log.SetFlags(log.Lshortfile | log.LstdFlags)
-		log.Output(2, fmt.Sprintf("%v", a))
+		_ = log.Output(2, fmt.Sprintf("%v", a))
 	}
 }

@@ -39,7 +39,6 @@ func ParseFromTags(fileName string) (*Graph, error) {
 			}
 		case *ast.TypeSpec:
 			if v, ok := t.Type.(*ast.StructType); ok {
-
 				s := &Struct{
 					Name:            t.Name.Name,
 					DefaultFuncName: defaultFuncName,
@@ -104,12 +103,25 @@ func parseStructTags(gs *Struct, x *ast.StructType) {
 		if len(field.Names) == 0 {
 			continue
 		}
-		switch field.Type.(type) {
-		case *ast.StructType:
+		// switch field.Type.(type) {
+		// case *ast.StructType:
+		// 	sub := &Struct{
+		// 		Name:            field.Names[0].String(),
+		// 		DefaultFuncName: defaultFuncName,
+		// 	}
+		// 	gs.Fields = append(gs.Fields, &Field{
+		// 		Name: sub.Name,
+		// 		// Type:    sub.Name,
+		// 		// Value:   formatValue(sub.Name, field.Tag.Value),
+		// 		IsBasic: false,
+		// 	})
+		// }
+		if v, ok := field.Type.(*ast.StructType); ok {
 			sub := &Struct{
 				Name:            field.Names[0].String(),
 				DefaultFuncName: defaultFuncName,
 			}
+			parseStructTags(sub, v)
 			gs.Fields = append(gs.Fields, &Field{
 				Name: sub.Name,
 				// Type:    sub.Name,
@@ -117,8 +129,6 @@ func parseStructTags(gs *Struct, x *ast.StructType) {
 				IsBasic: false,
 			})
 			return
-		default:
-
 		}
 
 		if field.Tag == nil {
