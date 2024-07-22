@@ -44,6 +44,7 @@ var (
 	treeState = ""
 	date      = ""
 	builtBy   = ""
+	debug     = false
 )
 
 var helpCmd = &cobra.Command{
@@ -66,6 +67,9 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if debug {
+			gen.Debug()
+		}
 		file, err := cmd.Flags().GetString("file")
 		if err != nil {
 			return err
@@ -120,6 +124,7 @@ func init() {
 	rootCmd.SilenceUsage = true
 	rootCmd.AddCommand(helpCmd)
 	rootCmd.Flags().StringP("file", "f", ".", "load go files or directories")
+	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "debug mode")
 }
 
 func main() {
