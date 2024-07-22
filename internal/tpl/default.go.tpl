@@ -19,6 +19,7 @@ import (
 {{- define "structs"}}
 {{ range $s := $.Structs }}
 {{- if $s.IsValid }}
+// {{ $s.DefaultFuncName }} loads default values for {{ $s.Name }}
 func (obj *{{ $s.Name }}) {{ $s.DefaultFuncName }}() error {
 {{- range $f := $s.Fields }}
     {{- if $f.IsBasic }}

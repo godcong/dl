@@ -10,17 +10,23 @@ import (
 	"github.com/godcong/dl"
 )
 
+// Default loads default values for StructStruct
 func (obj *StructStruct) Default() error {
 	obj.Key = "key"
 	obj.Value = "value"
 	return nil
 }
+
+// Default loads default values for StructStd
 func (obj *StructStd) Default() error {
 	obj.FieldString = "test"
 	obj.FieldInt = 1
 	obj.FieldFloat64 = 1.1
 	obj.FieldBytes = []byte("test")
 	obj.FieldPBytes = dl.Pointer([]byte("test"))
+	obj.FieldIntSlice = []int{1, 2, 3}
+	obj.FieldPIntSlice = []*int{dl.Pointer(1), dl.Pointer(2), dl.Pointer(3)}
+	obj.FieldPIntPSlice = dl.Pointer([]*int{dl.Pointer(1), dl.Pointer(2), dl.Pointer(3)})
 	obj.FieldStringSlice = []string{"test", "test2"}
 	obj.FieldStringPSlice = []*string{dl.Pointer("test"), dl.Pointer("test2")}
 	obj.FieldPStringSlice = dl.Pointer([]string{"test", "test2"})
@@ -34,8 +40,10 @@ func (obj *StructStd) Default() error {
 	obj.FieldMapStringInt = map[string]int{"value1": 11, "value2": 22}
 	return nil
 }
+
+// Default loads default values for StructInner
 func (obj *StructInner) Default() error {
-	if err := dl.Load(&obj.FieldStruct); err != nil {
+	if err := dl.Load(&obj.FieldInnerStruct); err != nil {
 		return err
 	}
 	return nil

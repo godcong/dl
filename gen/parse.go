@@ -55,6 +55,27 @@ func ParseFromTags(fileName string) (*Graph, error) {
 }
 
 func parseFieldTag(field *ast.Field, tagName string) *Field {
+	if len(field.Names) == 0 {
+		return nil
+	}
+
+	if v, ok := field.Type.(*ast.StructType); ok {
+		sub := &Struct{
+			Name:            field.Names[0].String(),
+			DefaultFuncName: defaultFuncName,
+		}
+		parseStructTags(sub, v)
+
+		return &Field{
+			Name:    sub.Name,
+			IsBasic: false,
+		}
+	}
+
+	if field.Tag == nil {
+		return nil
+	}
+
 	fieldName := field.Names[0].String()
 
 	tagValues := strings.Fields(strings.Trim(field.Tag.Value, "`"))
@@ -68,10 +89,13 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 	if val == "" {
 		return nil
 	}
-
-	fieldType := parseType(field.Type)
 	val = strings.TrimPrefix(val, "\"")
 	val = strings.TrimSuffix(val, "\"")
+	if val == "-" {
+		return nil
+	}
+
+	fieldType := parseType(field.Type)
 	debugPrint(fmt.Sprintf("tagName: %s, tagValue: %s, fieldName: %s, fieldType: %s, val: %s", tagName, tagValues, fieldName,
 		fieldType, val))
 	return &Field{
@@ -92,17 +116,14 @@ func parseType(x ast.Expr) string {
 		return fmt.Sprintf("[]%s", parseType(v.Elt))
 	case *ast.MapType:
 		return fmt.Sprintf("map[%s]%s", parseType(v.Key), parseType(v.Value))
+	default:
+		panic(fmt.Sprintf("unknown type %T", x))
 	}
-
-	return fmt.Sprintf("%v", x)
 }
 
 func parseStructTags(gs *Struct, x *ast.StructType) {
 	for _, field := range x.Fields.List {
 		debugPrint("struct name", fmt.Sprintf("%+v", field), fmt.Sprintf("%T", field.Type))
-		if len(field.Names) == 0 {
-			continue
-		}
 		// switch field.Type.(type) {
 		// case *ast.StructType:
 		// 	sub := &Struct{
@@ -116,24 +137,6 @@ func parseStructTags(gs *Struct, x *ast.StructType) {
 		// 		IsBasic: false,
 		// 	})
 		// }
-		if v, ok := field.Type.(*ast.StructType); ok {
-			sub := &Struct{
-				Name:            field.Names[0].String(),
-				DefaultFuncName: defaultFuncName,
-			}
-			parseStructTags(sub, v)
-			gs.Fields = append(gs.Fields, &Field{
-				Name: sub.Name,
-				// Type:    sub.Name,
-				// Value:   formatValue(sub.Name, field.Tag.Value),
-				IsBasic: false,
-			})
-			return
-		}
-
-		if field.Tag == nil {
-			continue
-		}
 
 		tagValue := parseFieldTag(field, defaultTagName)
 		if tagValue != nil {

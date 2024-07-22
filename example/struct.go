@@ -12,6 +12,9 @@ type StructStd struct {
 	FieldFloat64           float64             `default:"1.1"`
 	FieldBytes             []byte              `default:"test"`
 	FieldPBytes            *[]byte             `default:"test"`
+	FieldIntSlice          []int               `default:"[1,2,3]"`
+	FieldPIntSlice         []*int              `default:"[1,2,3]"`
+	FieldPIntPSlice        *[]*int             `default:"[1,2,3]"`
 	FieldStringSlice       []string            `default:"[test,test2]"`
 	FieldStringPSlice      []*string           `default:"[test,test2]"`
 	FieldPStringSlice      *[]string           `default:"[test,test2]"`
@@ -31,7 +34,7 @@ type StructStd struct {
 }
 
 type StructInner struct {
-	FieldStruct struct {
+	FieldInnerStruct struct {
 		FieldInt    int    `default:"1"`
 		FieldString string `default:"test"`
 		FieldStruct struct {
@@ -41,6 +44,10 @@ type StructInner struct {
 	}
 
 	// FieldStructSlice []StructStruct `default:"[{Key:key,Value:value},{Key:key2,Value:value2}]"`
-	// FieldSlice   []int             `default:"[1,2,3]"`
+
 	// FieldStructSlice []StructStruct `default:"[{Key:key,Value:value}]"`
+}
+
+type StructNamed struct {
+	FieldStructStruct StructStruct // `default:"{Key:key,Value:value}"`
 }
