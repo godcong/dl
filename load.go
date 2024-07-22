@@ -26,11 +26,17 @@ type DefaultOptionLoaderFunc[T any, P any] func(*T, P) error
 // Load initializes members in a struct referenced by a pointer.
 // Maps and slices are initialized by `make` and other primitive types are set with default values.
 // `ptr` should be a struct pointer
-func Load[T any, P any](ptr *T, args ...P) error {
-	var arg P
-	if len(args) > 0 {
-		arg = args[0]
+func Load[T any](ptr *T) error {
+	if ok, err := LoadInterface(ptr, any(nil)); ok {
+		return err
 	}
+	return LoadStruct(ptr)
+}
+
+// LoadWithOption initializes members in a struct referenced by a pointer.
+// Maps and slices are initialized by `make` and other primitive types are set with default values.
+// `ptr` should be a struct pointer
+func LoadWithOption[T any, P any](ptr *T, arg P) error {
 	if ok, err := LoadInterface(ptr, arg); ok {
 		return err
 	}
@@ -41,9 +47,6 @@ func Load[T any, P any](ptr *T, args ...P) error {
 // Maps and slices are initialized by `make` and other primitive types are set with default values.
 // `ptr` should be a struct pointer
 func LoadInterface[P any](ptr any, arg P) (bool, error) {
-	if v, ok := ptr.(DefaultLoader); ok {
-		return ok, v.Default()
-	}
 	switch p := ptr.(type) {
 	case DefaultLoader:
 		return true, p.Default()

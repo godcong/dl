@@ -29,3 +29,18 @@ type StructStd struct {
 	// FieldSlice   []int             `default:"[1,2,3]"`
 	// FieldStructSlice []StructStruct `default:"[{Key:key,Value:value}]"`
 }
+
+type StructInner struct {
+	FieldStruct struct {
+		FieldInt    int    `default:"1"`
+		FieldString string `default:"test"`
+		FieldStruct struct {
+			FieldInt    int    `default:"1"`
+			FieldString string `default:"test"`
+		}
+	}
+
+	// FieldStructSlice []StructStruct `default:"[{Key:key,Value:value},{Key:key2,Value:value2}]"`
+	// FieldSlice   []int             `default:"[1,2,3]"`
+	// FieldStructSlice []StructStruct `default:"[{Key:key,Value:value}]"`
+}

@@ -34,3 +34,9 @@ func (obj *StructStd) Default() error {
 	obj.FieldMapStringInt = map[string]int{"value1": 11, "value2": 22}
 	return nil
 }
+func (obj *StructInner) Default() error {
+	if err := dl.Load(&obj.FieldStruct); err != nil {
+		return err
+	}
+	return nil
+}
