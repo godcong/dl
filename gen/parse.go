@@ -27,6 +27,7 @@ func ParseFromTags(fileName string) (*Graph, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	graph.Package = f.Name.Name
 	// range over the objects in the scope of this generated AST and check for StructType. Then range over fields
 	// contained in that struct.
@@ -42,17 +43,14 @@ func ParseFromTags(fileName string) (*Graph, error) {
 					Name:            t.Name.Name,
 					DefaultFuncName: defaultFuncName,
 				}
-				processStructTags(s, v)
+				parseStructTags(s, v)
 				if s.IsValid() {
 					graph.Structs = append(graph.Structs, s)
 				}
 			}
-		default:
-			return true
 		}
 		return true
 	})
-
 	return &graph, nil
 }
 
@@ -72,7 +70,6 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 	}
 
 	fieldType := parseType(field.Type)
-	// fmt.Printf("fieldType: %s,type(%T)\n", fieldType, field.Type)
 	val = strings.TrimPrefix(val, "\"")
 	val = strings.TrimSuffix(val, "\"")
 	return &Field{
@@ -84,32 +81,30 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 
 func parseType(x ast.Expr) string {
 	switch v := x.(type) {
+	case *ast.Ident:
+		return v.Name
 	case *ast.StarExpr:
 		return fmt.Sprintf("*%s", parseType(v.X))
 	case *ast.ArrayType:
-		if elt, ok := v.Elt.(*ast.Ident); ok {
-			// fmt.Printf("parse field type v: %v, v.string:%s\n", elt, elt.String())
-			return fmt.Sprintf("[]%s", elt.Name)
-		}
 		return fmt.Sprintf("[]%s", parseType(v.Elt))
 	case *ast.MapType:
 		return fmt.Sprintf("map[%s]%s", parseType(v.Key), parseType(v.Value))
 	}
+
 	return fmt.Sprintf("%v", x)
 }
 
-func processStructTags(gs *Struct, x *ast.StructType) {
+func parseStructTags(gs *Struct, x *ast.StructType) {
 	for _, field := range x.Fields.List {
 		if len(field.Names) == 0 {
 			continue
 		}
 		if field.Tag == nil {
-			return
+			continue
 		}
 
 		tagValue := parseFieldTag(field, defaultTagName)
 		if tagValue != nil {
-			// fmt.Printf("tagValue: %v\n", tagValue)
 			gs.Fields = append(gs.Fields, formatField(tagValue))
 		}
 	}
@@ -118,6 +113,27 @@ func processStructTags(gs *Struct, x *ast.StructType) {
 func formatField(value *Field) *Field {
 	value.Value = formatValue(value.Type, value.Value)
 	return value
+}
+
+func formatDefaultValue(typo string) (string, bool) {
+	basicType := true
+	switch typo {
+	case "bool":
+		fallthrough
+	case "int", "int8", "int16", "int32", "int64":
+		fallthrough
+	case "uint", "uint8", "uint16", "uint32", "uint64":
+		fallthrough
+	case "float32", "float64":
+		fallthrough
+	case "string":
+		fallthrough
+	case "[]byte":
+		basicType = true
+	default:
+		basicType = false
+	}
+	return typo, basicType
 }
 
 func formatValue(typo string, value string) string {
@@ -130,7 +146,7 @@ func formatValue(typo string, value string) string {
 		value = fmt.Sprintf("\"%s\"", value)
 	case strings.HasPrefix(typo, "[]byte"):
 		value = fmt.Sprintf("[]byte(\"%s\")", value)
-	case strings.HasPrefix(typo, "map"):
+	case strings.HasPrefix(typo, "map["):
 		innerType := typo[3:]
 		values := toArray(value, ",", 1)
 		keyType, valueType := mapKeyValueTypes(innerType)

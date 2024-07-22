@@ -21,12 +21,12 @@ import (
 {{- if $s.IsValid }}
 func (obj *{{ $s.Name }}) {{ $s.DefaultFuncName }}() error {
 {{- range $f := $s.Fields }}
-    {{- if $f.IsStruct }}
+    {{- if $f.IsBasic }}
+    obj.{{ $f.Name }} = {{ $f.Value }}
+    {{- else }}
     if err := dl.Load(&obj.{{ $f.Name }}); err != nil {
         return err
     }
-    {{- else }}
-    obj.{{ $f.Name }} = {{ $f.Value }}
     {{- end }}
 {{- end }}
     return nil
