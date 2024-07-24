@@ -3,8 +3,11 @@
 ## Overview
 
 DL (Default Loader) is a tool designed to generate and assign default values to fields within Go structs based on tags.
-This utility allows you to specify default values for your struct fields using a simple tag syntax, making it easier to
-initialize structs with predefined values without having to explicitly set them in your code.
+
+This utility allows you to specify default values for your struct fields using a simple tag syntax, 
+making it easier to initialize structs with predefined values without having to explicitly set them in your code.
+
+---
 `defaults.go` is forked from [creasty/defaults](https://github.com/creasty/defaults)
 
 ## Features
