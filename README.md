@@ -40,10 +40,22 @@ type Demo struct {
 
 ### Step 2: Generate Default Value Loading Method
 
-Run DL to generate the necessary loading method for your struct:
+Run DL to generate the necessary loading method for your struct, 
+using the `-f` flag to specify the file path with filename or directory:
 
-```
+```shell
 dl -f ./demo.go
+```
+
+This will generate a `Default() error` method in your struct that initializes the fields with the specified default values.
+
+Below is the generated code example with `Demo` struct:
+```go
+// Default loads default values for Demo
+func (obj *Demo) Default() error {
+	obj.Name = "demo"
+	return nil
+}
 ```
 
 ### Step 3: Load Default Values
