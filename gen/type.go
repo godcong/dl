@@ -1,3 +1,6 @@
+// Copyright (c) 2024 GodCong. All rights reserved.
+
+// Package gen for Default Loader
 package gen
 
 import (
