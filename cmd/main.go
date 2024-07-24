@@ -12,8 +12,8 @@ import (
 	goversion "github.com/caarlos0/go-version"
 	"github.com/spf13/cobra"
 
-	"github.com/godcong/dl/cmd/gen"
-	"github.com/godcong/dl/cmd/internal/io"
+	"github.com/godcong/dl/gen"
+	"github.com/godcong/dl/internal/io"
 )
 
 const helpExample = `
@@ -103,7 +103,7 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if err := io.WriteGraph(s, head, graph); err != nil {
+			if err := io.WriteGraph(s, head, graph, true); err != nil {
 				return err
 			}
 		}

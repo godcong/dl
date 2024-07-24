@@ -3,9 +3,12 @@
 ## Overview
 
 DL (Default Loader) is a tool designed to generate and assign default values to fields within Go structs based on tags.
-This utility allows you to specify default values for your struct fields using a simple tag syntax, making it easier to
-initialize structs with predefined values without having to explicitly set them in your code.
-`defaults.go` is forked from [creasty/defaults](https://github.com/creasty/defaults)
+
+This utility allows you to specify default values for your struct fields using a simple tag syntax, 
+making it easier to initialize structs with predefined values without having to explicitly set them in your code.
+
+---
+`defaults.go` is forked from [creasty/defaults](https://github.com/creasty/defaults) and modified to meet the requirements of this project.
 
 ## Features
 
@@ -31,16 +34,28 @@ Add the `default` tag to your struct fields to specify their default values:
 ```go
 // example: demo.go
 type Demo struct {
-Name string `default:"demo"`
+    Name string `default:"demo"`
 }
 ```
 
 ### Step 2: Generate Default Value Loading Method
 
-Run DL to generate the necessary loading method for your struct:
+Run DL to generate the necessary loading method for your struct, 
+using the `-f` flag to specify the file path with filename or directory:
 
-```
+```shell
 dl -f ./demo.go
+```
+
+This will generate a `Default() error` method in your struct that initializes the fields with the specified default values.
+
+Below is the generated code example with `Demo` struct:
+```go
+// Default loads default values for Demo
+func (obj *Demo) Default() error {
+	obj.Name = "demo"
+	return nil
+}
 ```
 
 ### Step 3: Load Default Values
@@ -49,10 +64,10 @@ In your code, use `dl.Load()` to populate your struct with the default values:
 
 ```go
 func main() {
-demo := &Demo{}
-if err := dl.Load(demo); err != nil {
-panic(err)
-} 
-// Now 'demo' has its fields initialized with default values. 
+    demo := &Demo{}
+    if err := dl.Load(demo); err != nil {
+        panic(err)
+    } 
+    // Now 'demo' has its fields initialized with default values. 
 }
 ```

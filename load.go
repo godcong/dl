@@ -73,3 +73,8 @@ func LoadStruct(ptr any) error {
 func Pointer[T any](v T) *T {
 	return &v
 }
+
+// Object creates a value from a pointer.
+func Object[T any](v *T) T {
+	return *v
+}

@@ -14,9 +14,9 @@ func Debug() {
 	debug = true
 }
 
-func debugPrint(a ...any) {
+func debugPrint(args ...any) {
 	if debug {
 		log.SetFlags(log.Lshortfile | log.LstdFlags)
-		_ = log.Output(2, fmt.Sprintf("%v", a))
+		_ = log.Output(2, fmt.Sprintln(args...))
 	}
 }
