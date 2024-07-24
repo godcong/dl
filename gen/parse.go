@@ -25,7 +25,7 @@ func ParseFromTags(fileName string) (*Graph, error) {
 	// Parse the file given in arguments
 	f, err := parser.ParseFile(fset, fileName, nil, parser.ParseComments)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse file error: %w", err)
 	}
 
 	graph.Package = f.Name.Name
@@ -104,6 +104,8 @@ func parseType(x ast.Expr) string {
 		return v.Name
 	case *ast.StarExpr:
 		return fmt.Sprintf("*%s", parseType(v.X))
+	case *ast.SelectorExpr:
+		return fmt.Sprintf("%s.%s", parseType(v.X), v.Sel.Name)
 	case *ast.ArrayType:
 		return fmt.Sprintf("[]%s", parseType(v.Elt))
 	case *ast.MapType:

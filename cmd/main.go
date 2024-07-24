@@ -103,7 +103,7 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if err := io.WriteGraph(s, head, graph); err != nil {
+			if err := io.WriteGraph(s, head, graph, true); err != nil {
 				return err
 			}
 		}
