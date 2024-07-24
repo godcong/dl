@@ -34,7 +34,7 @@ Add the `default` tag to your struct fields to specify their default values:
 ```go
 // example: demo.go
 type Demo struct {
-Name string `default:"demo"`
+    Name string `default:"demo"`
 }
 ```
 
@@ -52,10 +52,10 @@ In your code, use `dl.Load()` to populate your struct with the default values:
 
 ```go
 func main() {
-demo := &Demo{}
-if err := dl.Load(demo); err != nil {
-panic(err)
-} 
-// Now 'demo' has its fields initialized with default values. 
+    demo := &Demo{}
+    if err := dl.Load(demo); err != nil {
+        panic(err)
+    } 
+    // Now 'demo' has its fields initialized with default values. 
 }
 ```
