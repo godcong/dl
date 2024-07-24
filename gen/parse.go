@@ -66,6 +66,7 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 		}
 		parseStructTags(sub, v)
 
+		// TODO: now used reflect to set the unsupported type by `dl.Load`
 		return &Field{
 			Name:    sub.Name,
 			IsBasic: false,
@@ -77,33 +78,24 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 	}
 
 	fieldName := field.Names[0].String()
-
-	tagValues := strings.Fields(strings.Trim(field.Tag.Value, "`"))
-	val := ""
-	for i := range tagValues {
-		if strings.HasPrefix(tagValues[i], tagName) {
-			val = strings.TrimPrefix(tagValues[i], fmt.Sprintf("%s:", tagName))
-			break
-		}
-	}
-	if val == "" {
+	tags := NewStructTag(field.Tag.Value)
+	val, ok := tags.Lookup(tagName)
+	if !(ok && validateTag(val)) {
 		return nil
 	}
-	val = strings.TrimPrefix(val, "\"")
-	val = strings.TrimSuffix(val, "\"")
-	if val == "-" {
-		return nil
-	}
-
 	fieldType := parseType(field.Type)
-	debugPrint(fmt.Sprintf("tagName: %s, tagValue: %s, fieldName: %s, fieldType: %s, val: %s", tagName, tagValues, fieldName,
-		fieldType, val))
+	debugPrint("field tag:", fmt.Sprintf("tagName: %s, fieldName: %s, fieldType: %s, tagVal: %s",
+		tagName, fieldName, fieldType, val))
 	return &Field{
 		IsBasic: true,
 		Name:    fieldName,
 		Type:    fieldType,
 		Value:   val,
 	}
+}
+
+func validateTag(val string) bool {
+	return val != "" && val != "-"
 }
 
 func parseType(x ast.Expr) string {
@@ -123,7 +115,7 @@ func parseType(x ast.Expr) string {
 
 func parseStructTags(gs *Struct, x *ast.StructType) {
 	for _, field := range x.Fields.List {
-		debugPrint("struct name", fmt.Sprintf("%+v", field), fmt.Sprintf("%T", field.Type))
+		debugPrint("struct tags:", fmt.Sprintf("Type(%T)", field.Type), fmt.Sprintf("Value(%+v) ", field))
 		// switch field.Type.(type) {
 		// case *ast.StructType:
 		// 	sub := &Struct{

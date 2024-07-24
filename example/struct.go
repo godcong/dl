@@ -6,7 +6,9 @@ type StructStruct struct {
 }
 
 type StructStd struct {
-	FieldEmpty             string
+	FieldNone              any
+	FieldEmpty             any                 `default:""`
+	FieldIgnore            any                 `default:"-"`
 	FieldString            string              `default:"test"`
 	FieldInt               int                 `default:"1"`
 	FieldFloat64           float64             `default:"1.1"`
