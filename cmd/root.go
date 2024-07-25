@@ -1,7 +1,7 @@
 // Copyright (c) 2024 GodCong. All rights reserved.
 
-// Package main
-package main
+// Package cmd
+package cmd
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/godcong/dl/gen"
-	"github.com/godcong/dl/gen/internal/io"
+	"github.com/godcong/dl/internal/io"
 )
 
 const helpExample = `
@@ -127,10 +127,6 @@ func init() {
 	rootCmd.Version = buildVersion(version, commit, date, builtBy, treeState).String()
 	rootCmd.Flags().StringP("file", "f", ".", "load go files or directories")
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "debug mode")
-}
-
-func main() {
-	Execute()
 }
 
 func buildVersion(version, commit, date, builtBy, treeState string) goversion.Info {

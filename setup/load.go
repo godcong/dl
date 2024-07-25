@@ -1,7 +1,7 @@
 // Copyright (c) 2024 GodCong. All rights reserved.
 
-// Package dl for Default Loader
-package dl
+// Package setup for Default Loader
+package setup
 
 // DefaultLoader is an interface that can be implemented by structs to customize the default
 type DefaultLoader interface {

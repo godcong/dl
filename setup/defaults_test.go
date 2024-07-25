@@ -1,4 +1,4 @@
-package dl
+package setup
 
 import (
 	"encoding/json"

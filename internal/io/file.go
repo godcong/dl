@@ -15,8 +15,8 @@ import (
 	goversion "github.com/caarlos0/go-version"
 
 	"github.com/godcong/dl/gen"
-	"github.com/godcong/dl/gen/internal/shell"
-	"github.com/godcong/dl/gen/internal/tpl"
+	"github.com/godcong/dl/internal/shell"
+	"github.com/godcong/dl/internal/tpl"
 )
 
 const (
