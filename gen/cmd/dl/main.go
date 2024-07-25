@@ -122,7 +122,9 @@ func Execute() {
 
 func init() {
 	rootCmd.SilenceUsage = true
-	rootCmd.AddCommand(helpCmd)
+
+	rootCmd.SetHelpCommand(helpCmd)
+	rootCmd.Version = buildVersion(version, commit, date, builtBy, treeState).String()
 	rootCmd.Flags().StringP("file", "f", ".", "load go files or directories")
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "debug mode")
 }
