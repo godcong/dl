@@ -71,3 +71,6 @@ func main() {
     // Now 'demo' has its fields initialized with default values. 
 }
 ```
+
+## License
+`DL` is released under the MIT license. See LICENSE.txt

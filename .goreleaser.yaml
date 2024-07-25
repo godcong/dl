@@ -22,8 +22,8 @@ builds:
     flags:
       - -trimpath
     ldflags: -s -w -X main.builtBy=GodCong -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}} -X main.treeState={{ .IsGitDirty }}
-    main: ./cmd/dl/main.go
-    dir: ./gen
+    main: ./main.go
+    dir: .
     goos:
       - darwin
       - windows

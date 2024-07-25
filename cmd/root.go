@@ -131,7 +131,7 @@ func init() {
 
 func buildVersion(version, commit, date, builtBy, treeState string) goversion.Info {
 	return goversion.GetVersionInfo(
-		goversion.WithAppDetails("dl", "Default Loader is a default value generate tool for go structs", website),
+		goversion.WithAppDetails("Default Loader", "A default value generate tool for go structs", website),
 		goversion.WithASCIIName(asciiArt),
 		func(i *goversion.Info) {
 			if commit != "" {
