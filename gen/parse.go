@@ -12,14 +12,8 @@ import (
 	"strings"
 )
 
-// ParseFromTags parse default tags from struct.
-func ParseFromTags(fileName string) (*Graph, error) {
-	graph := Graph{
-		Package: "",
-		Imports: nil,
-		Structs: nil,
-	}
-
+// ParseFromFile parse default tags from struct.
+func ParseFromFile(fileName string) (*Graph, error) {
 	// positions are relative to fset
 	fset := token.NewFileSet()
 	// Parse the file given in arguments
@@ -27,8 +21,17 @@ func ParseFromTags(fileName string) (*Graph, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse file error: %w", err)
 	}
+	graph := Graph{
+		Package: f.Name.Name,
+	}
+	if err := ParseFromAstFile(f, &graph); err != nil {
+		return nil, err
+	}
 
-	graph.Package = f.Name.Name
+	return &graph, nil
+}
+
+func ParseFromAstFile(f *ast.File, graph *Graph) error {
 	// range over the objects in the scope of this generated AST and check for StructType. Then range over fields
 	// contained in that struct.
 	ast.Inspect(f, func(n ast.Node) bool {
@@ -51,13 +54,14 @@ func ParseFromTags(fileName string) (*Graph, error) {
 		}
 		return true
 	})
-	return &graph, nil
+	return nil
 }
 
 func parseFieldTag(field *ast.Field, tagName string) *Field {
 	if len(field.Names) == 0 {
 		return nil
 	}
+	fieldName := field.Names[0].String()
 
 	if v, ok := field.Type.(*ast.StructType); ok {
 		sub := &Struct{
@@ -77,15 +81,15 @@ func parseFieldTag(field *ast.Field, tagName string) *Field {
 		return nil
 	}
 
-	fieldName := field.Names[0].String()
-	tags := NewStructTag(field.Tag.Value)
-	val, ok := tags.Lookup(tagName)
-	if !(ok && validateTag(val)) {
+	tags := StructTagFromString(field.Tag.Value)
+	val := tags.Get(tagName)
+	if !(validateTag(val)) {
 		return nil
 	}
 	fieldType := parseType(field.Type)
-	debugPrint("field tag:", fmt.Sprintf("tagName: %s, fieldName: %s, fieldType: %s, tagVal: %s",
-		tagName, fieldName, fieldType, val))
+	debugPrint("field tag:",
+		fmt.Sprintf("tagName: %s, fieldName: %s, fieldType: %s, tagVal: %s",
+			tagName, fieldName, fieldType, val))
 	return &Field{
 		IsBasic: true,
 		Name:    fieldName,
