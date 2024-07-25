@@ -99,7 +99,7 @@ var rootCmd = &cobra.Command{
 
 		head := buildVersion(version, commit, date, builtBy, treeState)
 		for _, s := range filelist {
-			graph, err := gen.ParseFromTags(s)
+			graph, err := gen.ParseFromFile(s)
 			if err != nil {
 				return err
 			}
