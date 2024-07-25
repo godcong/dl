@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/godcong/dl/gen"
-	"github.com/godcong/dl/internal/io"
+	"github.com/godcong/dl/gen/internal/io"
 )
 
 const helpExample = `

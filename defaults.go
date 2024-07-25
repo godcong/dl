@@ -40,6 +40,12 @@ func setDefaults(ptr interface{}) error {
 }
 
 func setIntField(field reflect.Value, defaultVal string, size int) {
+	if size == 64 {
+		if val, err := time.ParseDuration(defaultVal); err == nil {
+			field.Set(reflect.ValueOf(val).Convert(field.Type()))
+			return
+		}
+	}
 	if val, err := strconv.ParseInt(defaultVal, 0, size); err == nil {
 		field.SetInt(val)
 	}
@@ -54,6 +60,12 @@ func setUintField(field reflect.Value, defaultVal string, size int) {
 func setFloatField(field reflect.Value, defaultVal string, size int) {
 	if val, err := strconv.ParseFloat(defaultVal, size); err == nil {
 		field.SetFloat(val)
+	}
+}
+
+func setObjectField(field reflect.Value, defaultVal string) {
+	if val, err := strconv.ParseBool(defaultVal); err == nil {
+		field.Set(reflect.ValueOf(val))
 	}
 }
 
@@ -77,36 +89,12 @@ func setField(field reflect.Value, defaultVal string) error {
 			if val, err := strconv.ParseBool(defaultVal); err == nil {
 				field.SetBool(val)
 			}
-		case reflect.Int:
-			setIntField(field, defaultVal, strconv.IntSize)
-		case reflect.Int8:
-			setIntField(field, defaultVal, 8)
-		case reflect.Int16:
-			setIntField(field, defaultVal, 16)
-		case reflect.Int32:
-			setIntField(field, defaultVal, 32)
-		case reflect.Int64:
-			if val, err := time.ParseDuration(defaultVal); err == nil {
-				field.Set(reflect.ValueOf(val).Convert(field.Type()))
-			} else if val, err := strconv.ParseInt(defaultVal, 0, 64); err == nil {
-				field.Set(reflect.ValueOf(val).Convert(field.Type()))
-			}
-		case reflect.Uint:
-			setUintField(field, defaultVal, strconv.IntSize)
-		case reflect.Uint8:
-			setUintField(field, defaultVal, 8)
-		case reflect.Uint16:
-			setUintField(field, defaultVal, 16)
-		case reflect.Uint32:
-			setUintField(field, defaultVal, 32)
-		case reflect.Uint64:
-			setUintField(field, defaultVal, 64)
-		case reflect.Uintptr:
-			setUintField(field, defaultVal, strconv.IntSize)
-		case reflect.Float32:
-			setFloatField(field, defaultVal, 32)
-		case reflect.Float64:
-			setFloatField(field, defaultVal, 64)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			setIntField(field, defaultVal, field.Type().Bits())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+			setUintField(field, defaultVal, field.Type().Bits())
+		case reflect.Float32, reflect.Float64:
+			setFloatField(field, defaultVal, field.Type().Bits())
 		case reflect.String:
 			field.SetString(defaultVal)
 		case reflect.Slice:
