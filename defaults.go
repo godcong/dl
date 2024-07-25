@@ -63,12 +63,6 @@ func setFloatField(field reflect.Value, defaultVal string, size int) {
 	}
 }
 
-func setObjectField(field reflect.Value, defaultVal string) {
-	if val, err := strconv.ParseBool(defaultVal); err == nil {
-		field.Set(reflect.ValueOf(val))
-	}
-}
-
 func setField(field reflect.Value, defaultVal string) error {
 	if !field.CanSet() {
 		return nil
