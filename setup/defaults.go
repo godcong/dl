@@ -159,7 +159,7 @@ func setField(field reflect.Value, defaultVal string) error {
 				if err := setField(ref.Elem(), ""); err != nil {
 					return err
 				}
-				field.SetMapIndex(e, ref.Elem()))
+				field.SetMapIndex(e, ref.Elem())
 			default:
 				// nothing to do
 			}
