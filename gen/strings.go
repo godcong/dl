@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const convertPointer = "setup.Pointer(%s)"
+
 func trimSide(src string, trim string) string {
 	src = strings.TrimPrefix(src, trim)
 	src = strings.TrimSuffix(src, trim)

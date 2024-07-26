@@ -153,7 +153,7 @@ func formatValue(typo string, value string) string {
 	case strings.HasPrefix(typo, "*"):
 		innerType := typo[1:]
 		value = formatValue(innerType, value)
-		return fmt.Sprintf("dl.Pointer(%s)", value)
+		return fmt.Sprintf(convertPointer, value)
 	case strings.HasPrefix(typo, "string"):
 		value = fmt.Sprintf("\"%s\"", value)
 	case strings.HasPrefix(typo, "[]byte"):

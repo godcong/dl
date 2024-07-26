@@ -4,7 +4,6 @@
 package setup
 
 import (
-	"encoding"
 	"encoding/json"
 	"reflect"
 	"strconv"
@@ -12,7 +11,7 @@ import (
 )
 
 const (
-	fieldName = "default"
+	tagName = "default"
 )
 
 func setDefaults(ptr interface{}) error {
@@ -29,7 +28,7 @@ func setDefaults(ptr interface{}) error {
 	}
 
 	for i := 0; i < t.NumField(); i++ {
-		if defaultVal := t.Field(i).Tag.Get(fieldName); defaultVal != "-" {
+		if defaultVal := t.Field(i).Tag.Get(tagName); defaultVal != "-" {
 			if err := setField(v.Field(i), defaultVal); err != nil {
 				return err
 			}
@@ -160,7 +159,7 @@ func setField(field reflect.Value, defaultVal string) error {
 				if err := setField(ref.Elem(), ""); err != nil {
 					return err
 				}
-				field.SetMapIndex(e, ref.Elem().Convert(v.Type()))
+				field.SetMapIndex(e, ref.Elem()))
 			default:
 				// nothing to do
 			}
@@ -173,14 +172,18 @@ func setField(field reflect.Value, defaultVal string) error {
 }
 
 func unmarshalByInterface(field reflect.Value, defaultVal string) bool {
-	asText, ok := field.Addr().Interface().(encoding.TextUnmarshaler)
+	asText, ok := field.Addr().Interface().(interface {
+		UnmarshalText(text []byte) error
+	})
 	if ok && defaultVal != "" {
 		// if field implements encode.TextUnmarshaler, try to use it before decode by kind
 		if err := asText.UnmarshalText([]byte(defaultVal)); err == nil {
 			return true
 		}
 	}
-	asJSON, ok := field.Addr().Interface().(json.Unmarshaler)
+	asJSON, ok := field.Addr().Interface().(interface {
+		UnmarshalJSON([]byte) error
+	})
 	if ok && defaultVal != "" && defaultVal != "{}" && defaultVal != "[]" {
 		// if field implements json.Unmarshaler, try to use it before decode by kind
 		if err := asJSON.UnmarshalJSON([]byte(defaultVal)); err == nil {

@@ -10,7 +10,7 @@
 package {{ $.Package }}
 
 import (
-    "github.com/godcong/dl"
+    "github.com/godcong/dl/setup"
 {{- range $import := $.Imports }}
     {{ $import }}
 {{ end -}}
@@ -25,7 +25,7 @@ func (obj *{{ $s.Name }}) {{ $s.DefaultFuncName }}() error {
     {{- if $f.IsBasic }}
     obj.{{ $f.Name }} = {{ $f.Value }}
     {{- else }}
-    if err := dl.Load(&obj.{{ $f.Name }}); err != nil {
+    if err := setup.Load(&obj.{{ $f.Name }}); err != nil {
         return err
     }
     {{- end }}
