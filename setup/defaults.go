@@ -172,24 +172,26 @@ func setField(field reflect.Value, defaultVal string) error {
 }
 
 func unmarshalByInterface(field reflect.Value, defaultVal string) bool {
-	asText, ok := field.Addr().Interface().(interface {
+	if defaultVal == "" {
+		return false
+	}
+	if asText, ok := field.Addr().Interface().(interface {
 		UnmarshalText(text []byte) error
-	})
-	if ok && defaultVal != "" {
+	}); ok {
 		// if field implements encode.TextUnmarshaler, try to use it before decode by kind
 		if err := asText.UnmarshalText([]byte(defaultVal)); err == nil {
 			return true
 		}
 	}
-	asJSON, ok := field.Addr().Interface().(interface {
+	if asJSON, ok := field.Addr().Interface().(interface {
 		UnmarshalJSON([]byte) error
-	})
-	if ok && defaultVal != "" && defaultVal != "{}" && defaultVal != "[]" {
+	}); ok && defaultVal != "{}" && defaultVal != "[]" {
 		// if field implements json.Unmarshaler, try to use it before decode by kind
 		if err := asJSON.UnmarshalJSON([]byte(defaultVal)); err == nil {
 			return true
 		}
 	}
+
 	return false
 }
 
