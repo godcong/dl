@@ -5,6 +5,7 @@ package setup
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -27,12 +28,15 @@ func setDefaults(ptr interface{}) error {
 		return InvalidTypeError(t.Kind().String())
 	}
 
-	var setter FieldSetter
 	for i := 0; i < t.NumField(); i++ {
 		if defaultVal := t.Field(i).Tag.Get(tagName); defaultVal != "-" {
 			field := v.Field(i)
-			setter = GetSetter(field.Kind())
-			if err := setField(field, defaultVal); err != nil {
+			fmt.Println("kind", field.Kind(), field.String())
+			if err := setField(&Field{
+				Setter:   GetSetter(field.Kind()),
+				Value:    field,
+				TagValue: defaultVal,
+			}); err != nil {
 				return err
 			}
 		}
@@ -65,60 +69,65 @@ func setFloatField(field reflect.Value, defaultVal string, size int) {
 	}
 }
 
-func setField(field reflect.Value, defaultVal string) error {
+func setField(field *Field) error {
 	if !field.CanSet() {
 		return nil
 	}
 
-	if !shouldInitializeField(field, defaultVal) {
+	if !shouldInitializeField(field.Value, field.TagValue) {
 		return nil
 	}
 
-	isInitial := isInitialValue(field)
-	if isInitial {
-		if unmarshalByInterface(field, defaultVal) {
+	needInit := field.IsZero()
+	if needInit {
+		if unmarshalByInterface(field.Value, field.TagValue) {
 			return nil
 		}
 
 		switch field.Kind() {
 		case reflect.Bool:
-			if val, err := strconv.ParseBool(defaultVal); err == nil {
-				field.SetBool(val)
-			}
+			field.Fill()
+			// if val, err := strconv.ParseBool(defaultVal); err == nil {
+			// 	field.SetBool(val)
+			// }
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			setIntField(field, defaultVal, field.Type().Bits())
+			field.Fill()
+			// setIntField(field, defaultVal, field.Type().Bits())
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			setUintField(field, defaultVal, field.Type().Bits())
+			field.Fill()
+			// setUintField(field, defaultVal, field.Type().Bits())
 		case reflect.Float32, reflect.Float64:
-			setFloatField(field, defaultVal, field.Type().Bits())
+			field.Fill()
+			// setFloatField(field, defaultVal, field.Type().Bits())
 		case reflect.String:
-			field.SetString(defaultVal)
+			field.Fill()
+			// field.SetString(defaultVal)
 		case reflect.Slice:
-			ref := reflect.New(field.Type())
-			ref.Elem().Set(reflect.MakeSlice(field.Type(), 0, 0))
-			if defaultVal != "" && defaultVal != "[]" {
-				if err := json.Unmarshal([]byte(defaultVal), ref.Interface()); err != nil {
+			ref := field.Init()
+			// ref := reflect.New(field.Type())
+			// ref.Elem().Set(reflect.MakeSlice(field.Type(), 0, 0))
+			if field.TagValue != "" && field.TagValue != "[]" {
+				if err := json.Unmarshal([]byte(field.TagValue), ref.Interface()); err != nil {
 					return err
 				}
 			}
-			field.Set(ref.Elem().Convert(field.Type()))
+			field.Set(ref.Elem().Convert(field.Value.Type()))
 		case reflect.Map:
-			ref := reflect.New(field.Type())
-			ref.Elem().Set(reflect.MakeMap(field.Type()))
-			if defaultVal != "" && defaultVal != "{}" {
-				if err := json.Unmarshal([]byte(defaultVal), ref.Interface()); err != nil {
+			ref := field.Init()
+			if field.TagValue != "" && field.TagValue != "{}" {
+				if err := json.Unmarshal([]byte(field.TagValue), ref.Interface()); err != nil {
 					return err
 				}
 			}
-			field.Set(ref.Elem().Convert(field.Type()))
+			field.Set(ref.Elem().Convert(field.Value.Type()))
 		case reflect.Struct:
-			if defaultVal != "" && defaultVal != "{}" {
-				if err := json.Unmarshal([]byte(defaultVal), field.Addr().Interface()); err != nil {
+			if field.TagValue != "" && field.TagValue != "{}" {
+				if err := json.Unmarshal([]byte(field.TagValue), field.Value.Addr().Interface()); err != nil {
 					return err
 				}
 			}
 		case reflect.Ptr:
-			field.Set(reflect.New(field.Type().Elem()))
+			field.Init()
 		default:
 			// nothing to do
 		}
@@ -126,31 +135,44 @@ func setField(field reflect.Value, defaultVal string) error {
 
 	switch field.Kind() {
 	case reflect.Ptr:
-		if isInitial || field.Elem().Kind() == reflect.Struct {
-			err := setField(field.Elem(), defaultVal)
+		if needInit || field.Value.Elem().Kind() == reflect.Struct {
+			err := setField(&Field{
+				Setter:   GetSetter(field.Value.Elem().Kind()),
+				Value:    field.Value.Elem(),
+				TagValue: field.TagValue,
+			})
 			if err != nil {
 				return err
 			}
 		}
 	case reflect.Struct:
-		if err := LoadStruct(field.Addr().Interface()); err != nil {
+		if err := LoadStruct(field.Value.Addr().Interface()); err != nil {
 			return err
 		}
 	case reflect.Slice:
-		for j := 0; j < field.Len(); j++ {
-			if err := setField(field.Index(j), defaultVal); err != nil {
+		for j := 0; j < field.Value.Len(); j++ {
+			v := field.Value.Index(j)
+			if err := setField(&Field{
+				Setter:   GetSetter(v.Kind()),
+				Value:    v,
+				TagValue: field.TagValue,
+			}); err != nil {
 				return err
 			}
 		}
 	case reflect.Map:
-		for _, e := range field.MapKeys() {
-			var v = field.MapIndex(e)
-
+		iter := field.Value.MapRange()
+		for iter.Next() {
+			v := iter.Value()
 			switch v.Kind() {
 			case reflect.Ptr:
-				switch v.Elem().Kind() {
+				elem := v.Elem()
+				switch elem.Kind() {
 				case reflect.Struct, reflect.Slice, reflect.Map:
-					if err := setField(v.Elem(), ""); err != nil {
+					if err := setField(&Field{
+						Setter: GetSetter(elem.Kind()),
+						Value:  elem,
+					}); err != nil {
 						return err
 					}
 				default:
@@ -159,13 +181,17 @@ func setField(field reflect.Value, defaultVal string) error {
 			case reflect.Struct, reflect.Slice, reflect.Map:
 				ref := reflect.New(v.Type())
 				ref.Elem().Set(v)
-				if err := setField(ref.Elem(), ""); err != nil {
+				if err := setField(&Field{
+					Setter: GetSetter(ref.Kind()),
+					Value:  ref,
+				}); err != nil {
 					return err
 				}
-				field.SetMapIndex(e, ref.Elem())
+				field.Value.SetMapIndex(iter.Key(), ref.Elem())
 			default:
 				// nothing to do
 			}
+
 		}
 	default:
 		// nothing to do
