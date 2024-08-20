@@ -575,10 +575,10 @@ func TestInit(t *testing.T) {
 	// 		t.Errorf("it should not override non-initial value")
 	// 	}
 	// 	if !reflect.DeepEqual(sample.NonInitialStruct, Struct{Embedded: Embedded{Int: 1}, Foo: 123, Bar: 456, WithDefault: "foo"}) {
-	// 		t.Errorf("it should not override non-initial value but set defaults for fields")
+	// 		t.Errorf("it should not override non-initial value but set defaults for fieldSetters")
 	// 	}
 	// 	if !reflect.DeepEqual(sample.NonInitialStructPtr, &Struct{Embedded: Embedded{Int: 1}, Foo: 123, Bar: 456, WithDefault: "foo"}) {
-	// 		t.Errorf("it should not override non-initial value but set defaults for fields")
+	// 		t.Errorf("it should not override non-initial value but set defaults for fieldSetters")
 	// 	}
 	// })
 	//

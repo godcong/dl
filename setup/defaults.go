@@ -27,9 +27,12 @@ func setDefaults(ptr interface{}) error {
 		return InvalidTypeError(t.Kind().String())
 	}
 
+	var setter FieldSetter
 	for i := 0; i < t.NumField(); i++ {
 		if defaultVal := t.Field(i).Tag.Get(tagName); defaultVal != "-" {
-			if err := setField(v.Field(i), defaultVal); err != nil {
+			field := v.Field(i)
+			setter = GetSetter(field.Kind())
+			if err := setField(field, defaultVal); err != nil {
 				return err
 			}
 		}
