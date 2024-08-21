@@ -5,6 +5,7 @@ import (
 	"math"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,8 +41,15 @@ func (f Field) Fill() bool {
 	if !f.IsZero() {
 		return false
 	}
+	if f.Unmarshal() {
+		return true
+	}
 	f.Setter.Set(f.Value, f.TagValue)
 	return true
+}
+
+func (f Field) Unmarshal() bool {
+	return unmarshal(f.Value, f.TagValue)
 }
 
 func (f Field) CanSet() bool {
@@ -52,8 +60,16 @@ func (f Field) Kind() Kind {
 	return f.Value.Kind()
 }
 
-func (f Field) Set(convert Value) {
+func (f Field) Tag() string {
+	return f.TagValue
+}
+
+func (f Field) SetRef(convert Value) {
 	f.Value.Set(convert)
+}
+
+func (f Field) SetValue() {
+	f.Setter.Set(f.Value, f.TagValue)
 }
 
 type floatField struct {
@@ -197,9 +213,12 @@ func (p pointerField) Set(value Value, val string) {
 type chanField struct{}
 
 func (c chanField) Init(value Value, val string) (Value, bool) {
-	ref := reflect.MakeChan(value.Type(), 0)
-	value.Set(ref)
-	return ref, true
+	if val == "" || val == "make()" || !strings.HasPrefix(val, "make") {
+		return reflect.MakeChan(value.Type(), 0), true
+	}
+	val = strings.Trim(strings.TrimPrefix(val, "make"), "()")
+	buf, _ := strconv.Atoi(val)
+	return reflect.MakeChan(value.Type(), buf), true
 }
 
 func (c chanField) IsZero(value Value) bool {
@@ -208,7 +227,7 @@ func (c chanField) IsZero(value Value) bool {
 
 func (c chanField) Set(value Value, val string) {
 	// TODO: channel capacity
-	value.Set(reflect.MakeChan(value.Type(), 0))
+	// value.Set(reflect.MakeChan(value.Type(), 0))
 }
 
 type mapField struct{}

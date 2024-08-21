@@ -114,6 +114,8 @@ type Sample struct {
 	MySlice     MySlice        `default:"[]"`
 	MyFunc      func() bool    `default:"func()"`
 	MyFunc2     func(int) uint `default:"func()"`
+	MyChan      chan int       `default:"make()"`
+	MyChan2     chan int       `default:"make(10)"`
 
 	StructWithText        net.IP         `default:"10.0.0.1"`
 	StructPtrWithText     *net.IP        `default:"10.0.0.1"`
@@ -497,6 +499,12 @@ func TestInit(t *testing.T) {
 		}
 		if sample.MyFunc != nil && sample.MyFunc() != false {
 			t.Errorf("result of func should was: %v", false)
+		}
+		if sample.MyChan == nil {
+			t.Errorf("it should initialize chan")
+		}
+		if sample.MyChan2 == nil || cap(sample.MyChan2) != 10 {
+			t.Errorf("it should initialize chan2 with 10 but got: %d", cap(sample.MyChan2))
 		}
 	})
 

@@ -54,7 +54,7 @@ func setField(field *Field) error {
 
 	needInit := field.IsZero()
 	if needInit {
-		if unmarshalByInterface(field.Value, field.TagValue) {
+		if unmarshal(field.Value, field.TagValue) {
 			return nil
 		}
 
@@ -86,7 +86,7 @@ func setField(field *Field) error {
 						return err
 					}
 				}
-				field.Set(ref.Elem().Convert(field.Value.Type()))
+				field.SetRef(ref.Elem().Convert(field.Value.Type()))
 			}
 		case reflect.Map:
 			ref, truth := field.Init()
@@ -96,7 +96,7 @@ func setField(field *Field) error {
 						return err
 					}
 				}
-				field.Set(ref.Elem().Convert(field.Value.Type()))
+				field.SetRef(ref.Elem().Convert(field.Value.Type()))
 			}
 		case reflect.Struct:
 			ref, truth := field.Init()
@@ -110,12 +110,17 @@ func setField(field *Field) error {
 		case reflect.Pointer:
 			ref, truth := field.Init()
 			if truth {
-				field.Set(ref)
+				field.SetRef(ref)
 			}
 		case reflect.Func:
 			ref, truth := field.Init()
 			if truth {
-				field.Set(ref)
+				field.SetRef(ref)
+			}
+		case reflect.Chan:
+			ref, truth := field.Init()
+			if truth {
+				field.SetRef(ref)
 			}
 		default:
 			// nothing to do
@@ -188,7 +193,7 @@ func setField(field *Field) error {
 	return nil
 }
 
-func unmarshalByInterface(field reflect.Value, defaultVal string) bool {
+func unmarshal(field reflect.Value, defaultVal string) bool {
 	if defaultVal == "" {
 		return false
 	}
