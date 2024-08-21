@@ -61,25 +61,16 @@ func setField(field *Field) error {
 		switch field.Kind() {
 		case reflect.Bool:
 			field.Fill()
-			// if val, err := strconv.ParseBool(defaultVal); err == nil {
-			// 	uintField.SetBool(val)
-			// }
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			field.Fill()
-			// setIntField(uintField, defaultVal, uintField.Type().Bits())
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 			field.Fill()
-			// setUintField(uintField, defaultVal, uintField.Type().Bits())
 		case reflect.Float32, reflect.Float64:
 			field.Fill()
-			// setFloatField(uintField, defaultVal, uintField.Type().Bits())
 		case reflect.String:
 			field.Fill()
-			// uintField.SetString(defaultVal)
 		case reflect.Slice:
 			ref, truth := field.Init()
-			// ref := reflect.New(uintField.Type())
-			// ref.Elem().Set(reflect.MakeSlice(uintField.Type(), 0, 0))
 			if truth {
 				if field.TagValue != "" && field.TagValue != "[]" {
 					if err := json.Unmarshal([]byte(field.TagValue), ref.Interface()); err != nil {
