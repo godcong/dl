@@ -94,24 +94,26 @@ type Sample struct {
 	MapPtr     *map[string]int `default:"{}"`
 	SlicePtr   *[]string       `default:"[]"`
 
-	MyInt       MyInt     `default:"1"`
-	MyInt8      MyInt8    `default:"8"`
-	MyInt16     MyInt16   `default:"16"`
-	MyInt32     MyInt32   `default:"32"`
-	MyInt64     MyInt64   `default:"64"`
-	MyUint      MyUint    `default:"1"`
-	MyUint8     MyUint8   `default:"8"`
-	MyUint16    MyUint16  `default:"16"`
-	MyUint32    MyUint32  `default:"32"`
-	MyUint64    MyUint64  `default:"64"`
-	MyUintptr   MyUintptr `default:"1"`
-	MyFloat32   MyFloat32 `default:"1.32"`
-	MyFloat64   MyFloat64 `default:"1.64"`
-	MyBoolTrue  MyBool    `default:"true"`
-	MyBoolFalse MyBool    `default:"false"`
-	MyString    MyString  `default:"hello"`
-	MyMap       MyMap     `default:"{}"`
-	MySlice     MySlice   `default:"[]"`
+	MyInt       MyInt          `default:"1"`
+	MyInt8      MyInt8         `default:"8"`
+	MyInt16     MyInt16        `default:"16"`
+	MyInt32     MyInt32        `default:"32"`
+	MyInt64     MyInt64        `default:"64"`
+	MyUint      MyUint         `default:"1"`
+	MyUint8     MyUint8        `default:"8"`
+	MyUint16    MyUint16       `default:"16"`
+	MyUint32    MyUint32       `default:"32"`
+	MyUint64    MyUint64       `default:"64"`
+	MyUintptr   MyUintptr      `default:"1"`
+	MyFloat32   MyFloat32      `default:"1.32"`
+	MyFloat64   MyFloat64      `default:"1.64"`
+	MyBoolTrue  MyBool         `default:"true"`
+	MyBoolFalse MyBool         `default:"false"`
+	MyString    MyString       `default:"hello"`
+	MyMap       MyMap          `default:"{}"`
+	MySlice     MySlice        `default:"[]"`
+	MyFunc      func() bool    `default:"func()"`
+	MyFunc2     func(int) uint `default:"func()"`
 
 	StructWithText        net.IP         `default:"10.0.0.1"`
 	StructPtrWithText     *net.IP        `default:"10.0.0.1"`
@@ -302,10 +304,10 @@ func TestInit(t *testing.T) {
 		}
 
 		if sample.IntOct != 0o1 {
-			t.Errorf("it should initialize int with octal literal")
+			t.Errorf("it should initialize int with octal literal,%v", sample.IntOct)
 		}
 		if sample.Int8Oct != 0o10 {
-			t.Errorf("it should initialize int8 with octal literal")
+			t.Errorf("it should initialize int8 with octal literal,%v", sample.Int8Oct)
 		}
 		if sample.Int16Oct != 0o20 {
 			t.Errorf("it should initialize int16 with octal literal")
@@ -487,14 +489,23 @@ func TestInit(t *testing.T) {
 		if sample.MySlice == nil {
 			t.Errorf("it should initialize slice")
 		}
+		if sample.MyFunc == nil {
+			t.Errorf("it should initialize func")
+		}
+		if sample.MyFunc2 == nil {
+			t.Errorf("it should initialize func2")
+		}
+		if sample.MyFunc != nil && sample.MyFunc() != false {
+			t.Errorf("result of func should was: %v", false)
+		}
 	})
 
 	t.Run("nested", func(t *testing.T) {
 		if sample.Struct.WithDefault != "foo" {
-			t.Errorf("it should set default on inner field in struct")
+			t.Errorf("it should set default on inner uintField in struct")
 		}
 		if sample.StructPtr == nil || sample.StructPtr.WithDefault != "foo" {
-			t.Errorf("it should set default on inner field in struct pointer")
+			t.Errorf("it should set default on inner uintField in struct pointer")
 		}
 		if sample.Struct.Embedded.Int != 1 {
 			t.Errorf("it should set default on an Embedded struct")
@@ -608,13 +619,13 @@ func TestInit(t *testing.T) {
 	// 		t.Errorf("it should not override an initiated map")
 	// 	}
 	// 	if sample.MapOfStruct["Struct1"].Foo != 1 {
-	// 		t.Errorf("it should not override Foo field in Struct1 item")
+	// 		t.Errorf("it should not override Foo uintField in Struct1 item")
 	// 	}
 	// 	if sample.MapOfStruct["Struct1"].Bar != 0 {
-	// 		t.Errorf("it should set default for Bar field in Struct1 item")
+	// 		t.Errorf("it should set default for Bar uintField in Struct1 item")
 	// 	}
 	// 	if sample.MapOfStruct["Struct1"].WithDefault != "foo" {
-	// 		t.Errorf("it should set default for WithDefault field in Struct1 item")
+	// 		t.Errorf("it should set default for WithDefault uintField in Struct1 item")
 	// 	}
 	// })
 
@@ -626,22 +637,22 @@ func TestInit(t *testing.T) {
 			t.Errorf("it should not override an initiated map")
 		}
 		if sample.MapOfPtrStruct["Struct1"].Foo != 1 {
-			t.Errorf("it should not override Foo field in Struct1 item")
+			t.Errorf("it should not override Foo uintField in Struct1 item")
 		}
 		if sample.MapOfPtrStruct["Struct1"].Bar != 0 {
-			t.Errorf("it should set default for Bar field in Struct1 item")
+			t.Errorf("it should set default for Bar uintField in Struct1 item")
 		}
 		if sample.MapOfPtrStruct["Struct1"].WithDefault != "foo" {
-			t.Errorf("it should set default for WithDefault field in Struct1 item")
+			t.Errorf("it should set default for WithDefault uintField in Struct1 item")
 		}
 		if sample.MapOfPtrStruct["Struct2"].Foo != 0 {
-			t.Errorf("it should not override Foo field in Struct2 item")
+			t.Errorf("it should not override Foo uintField in Struct2 item")
 		}
 		if sample.MapOfPtrStruct["Struct2"].Bar != 5 {
-			t.Errorf("it should using setter to set default for Bar field in a Struct2 item")
+			t.Errorf("it should using setter to set default for Bar uintField in a Struct2 item")
 		}
 		if sample.MapOfPtrStruct["Struct2"].WithDefault != "foo" {
-			t.Errorf("it should set default for WithDefault field in Struct2 item")
+			t.Errorf("it should set default for WithDefault uintField in Struct2 item")
 		}
 	})
 

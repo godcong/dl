@@ -11,11 +11,11 @@ import (
 var ErrInvalidType = errors.New("empty")
 
 type invalidTypeErr struct {
-	typeString string
+	kind Kind
 }
 
 func (i *invalidTypeErr) Error() string {
-	return fmt.Sprintf("invalid type %s", i.typeString)
+	return fmt.Sprintf("invalid type %s", i.kind.String())
 }
 
 func (i *invalidTypeErr) Is(err error) bool {
@@ -23,9 +23,12 @@ func (i *invalidTypeErr) Is(err error) bool {
 		return false
 	}
 	var invalidTypeErr *invalidTypeErr
-	return errors.As(err, &invalidTypeErr)
+	if errors.As(err, &invalidTypeErr) {
+		return i.kind == invalidTypeErr.kind
+	}
+	return false
 }
 
-func InvalidTypeError(typeString string) error {
-	return &invalidTypeErr{typeString: typeString}
+func InvalidTypeError(kind Kind) error {
+	return &invalidTypeErr{kind: kind}
 }
