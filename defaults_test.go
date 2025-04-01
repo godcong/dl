@@ -496,7 +496,7 @@ func TestInit(t *testing.T) {
 		if sample.StructPtr == nil || sample.StructPtr.WithDefault != "foo" {
 			t.Errorf("it should set default on inner field in struct pointer")
 		}
-		if sample.Struct.Embedded.Int != 1 {
+		if sample.Struct.Int != 1 {
 			t.Errorf("it should set default on an Embedded struct")
 		}
 	})
