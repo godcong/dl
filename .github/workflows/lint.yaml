@@ -27,7 +27,7 @@ jobs:
       - name: Download Go dependencies
         run: go mod tidy
       - name: GolangCI Lint
-        uses: golangci/golangci-lint-action@v6 # v6.0.1
+        uses: golangci/golangci-lint-action@v7 # v6.0.1 -> v7.0.0
         with:
           args: --timeout=5m
-          version: v1.59.1
+          version: v2.0
