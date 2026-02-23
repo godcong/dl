@@ -18,16 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
       - name: Setup Go environment
-        uses: actions/setup-go@v5.4.0
+        uses: actions/setup-go@v6.2.0
         with:
           go-version: stable
           cache: false
       - name: Download Go dependencies
         run: go mod tidy
       - name: GolangCI Lint
-        uses: golangci/golangci-lint-action@v7 # v6.0.1 -> v7.0.0
+        uses: golangci/golangci-lint-action@v9 # v6.0.1 -> v7.0.0
         with:
           args: --timeout=5m
           version: v2.0
